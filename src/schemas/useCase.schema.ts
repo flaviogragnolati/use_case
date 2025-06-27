@@ -10,6 +10,7 @@ export const useCaseFlowDetailSchema = z.object({
 	exceptions: z.array(z.string().min(1, "Exception cannot be empty")),
 	notes: z.string(),
 });
+export type UseCaseFlowDetail = z.infer<typeof useCaseFlowDetailSchema>;
 
 export const useCaseFlowSchema = z.object({
 	id: z.number().min(1, "ID must be at least 1"),
@@ -21,6 +22,7 @@ export const useCaseFlowSchema = z.object({
 		.array(useCaseFlowDetailSchema)
 		.min(1, "At least one flow detail is required"),
 });
+export type UseCaseFlow = z.infer<typeof useCaseFlowSchema>;
 
 export const useCaseSchema = z.object({
 	id: z.number().min(1, "ID must be at least 1"),
@@ -55,3 +57,4 @@ export const useCaseSchema = z.object({
 	notes: z.string(),
 	status: z.enum(["draft", "review", "approved", "rejected"]),
 });
+export type UseCase = z.infer<typeof useCaseSchema>;

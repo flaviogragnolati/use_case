@@ -10,53 +10,59 @@ import {
 } from "~/ui/card";
 import { Badge } from "~/ui/badge";
 import { ArrowLeft, Download, Share } from "lucide-react";
+import type { UseCase } from "~/schemas";
+import {
+	getStatusColor,
+	getStatusText,
+	getFlowTypeColor,
+} from "~/lib/useCase.utils";
 
-type UseCaseFlowDetail = {
-	step: number;
-	actor: string;
-	action: string;
-	systemResponse: string;
-	conditions: string[];
-	exceptions: string[];
-	notes: string;
-};
+// type UseCaseFlowDetail = {
+// 	step: number;
+// 	actor: string;
+// 	action: string;
+// 	systemResponse: string;
+// 	conditions: string[];
+// 	exceptions: string[];
+// 	notes: string;
+// };
 
-type UseCaseFlow = {
-	id: number;
-	name: string;
-	type: "main" | "alternative" | "exception";
-	frequency: number;
-	description: string;
-	flowDetails: UseCaseFlowDetail[];
-};
+// type UseCaseFlow = {
+// 	id: number;
+// 	name: string;
+// 	type: "main" | "alternative" | "exception";
+// 	frequency: number;
+// 	description: string;
+// 	flowDetails: UseCaseFlowDetail[];
+// };
 
-type UseCase = {
-	id: number;
-	date: string;
-	sector: string;
-	name: string;
-	participants: string[];
-	description: string;
-	trigger: string;
-	documentationRef: string[];
-	useCaseRef: {
-		id: number;
-		name: string;
-	}[];
-	actors: {
-		primary: string[];
-		secondary: string[];
-	};
-	preconditions: string[];
-	succuesfulResults: string[];
-	failedResults: string[];
-	conditions: string[];
-	flows: UseCaseFlow[];
-	input: string[];
-	output: string[];
-	notes: string;
-	status: "draft" | "review" | "approved" | "rejected";
-};
+// type UseCase = {
+// 	id: number;
+// 	date: string;
+// 	sector: string;
+// 	name: string;
+// 	participants: string[];
+// 	description: string;
+// 	trigger: string;
+// 	documentationRef: string[];
+// 	useCaseRef: {
+// 		id: number;
+// 		name: string;
+// 	}[];
+// 	actors: {
+// 		primary: string[];
+// 		secondary: string[];
+// 	};
+// 	preconditions: string[];
+// 	succuesfulResults: string[];
+// 	failedResults: string[];
+// 	conditions: string[];
+// 	flows: UseCaseFlow[];
+// 	input: string[];
+// 	output: string[];
+// 	notes: string;
+// 	status: "draft" | "review" | "approved" | "rejected";
+// };
 
 interface UseCasePreviewProps {
 	data: UseCase;
@@ -64,34 +70,6 @@ interface UseCasePreviewProps {
 }
 
 export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case "draft":
-				return "bg-gray-100 text-gray-800";
-			case "review":
-				return "bg-yellow-100 text-yellow-800";
-			case "approved":
-				return "bg-green-100 text-green-800";
-			case "rejected":
-				return "bg-red-100 text-red-800";
-			default:
-				return "bg-gray-100 text-gray-800";
-		}
-	};
-
-	const getFlowTypeColor = (type: string) => {
-		switch (type) {
-			case "main":
-				return "bg-blue-100 text-blue-800";
-			case "alternative":
-				return "bg-purple-100 text-purple-800";
-			case "exception":
-				return "bg-orange-100 text-orange-800";
-			default:
-				return "bg-gray-100 text-gray-800";
-		}
-	};
-
 	const exportToJSON = () => {
 		const dataStr = JSON.stringify(data, null, 2);
 		const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
@@ -111,7 +89,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 					onClick={onBack}
 					className="flex items-center gap-2"
 				>
-					<ArrowLeft className="w-4 h-4" />
+					<ArrowLeft className="h-4 w-4" />
 					Volver al Formulario
 				</Button>
 				<div className="flex gap-2">
@@ -120,11 +98,11 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 						onClick={exportToJSON}
 						className="flex items-center gap-2"
 					>
-						<Download className="w-4 h-4" />
+						<Download className="h-4 w-4" />
 						Exportar JSON
 					</Button>
 					<Button variant="outline" className="flex items-center gap-2">
-						<Share className="w-4 h-4" />
+						<Share className="h-4 w-4" />
 						Compartir
 					</Button>
 				</div>
@@ -140,26 +118,20 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 							</CardDescription>
 						</div>
 						<Badge className={getStatusColor(data.status)}>
-							{data.status === "draft"
-								? "Borrador"
-								: data.status === "review"
-									? "En Revisión"
-									: data.status === "approved"
-										? "Aprobado"
-										: "Rechazado"}
+							{getStatusText(data.status)}
 						</Badge>
 					</div>
 				</CardHeader>
 				<CardContent className="space-y-6">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<h4 className="font-medium text-sm text-gray-500 uppercase tracking-wide">
+							<h4 className="font-medium text-gray-500 text-sm uppercase tracking-wide">
 								Fecha
 							</h4>
 							<p className="mt-1">{new Date(data.date).toLocaleDateString()}</p>
 						</div>
 						<div>
-							<h4 className="font-medium text-sm text-gray-500 uppercase tracking-wide">
+							<h4 className="font-medium text-gray-500 text-sm uppercase tracking-wide">
 								Disparador
 							</h4>
 							<p className="mt-1">{data.trigger}</p>
@@ -167,7 +139,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 					</div>
 
 					<div>
-						<h4 className="font-medium text-sm text-gray-500 uppercase tracking-wide mb-2">
+						<h4 className="mb-2 font-medium text-gray-500 text-sm uppercase tracking-wide">
 							Descripción
 						</h4>
 						<p className="text-gray-700">{data.description}</p>
@@ -175,7 +147,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 
 					{data.notes && (
 						<div>
-							<h4 className="font-medium text-sm text-gray-500 uppercase tracking-wide mb-2">
+							<h4 className="mb-2 font-medium text-gray-500 text-sm uppercase tracking-wide">
 								Notas
 							</h4>
 							<p className="text-gray-700">{data.notes}</p>
@@ -184,7 +156,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 				</CardContent>
 			</Card>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<Card>
 					<CardHeader>
 						<CardTitle>Participantes</CardTitle>
@@ -208,7 +180,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<h5 className="font-medium text-sm mb-2">Primarios</h5>
+							<h5 className="mb-2 font-medium text-sm">Primarios</h5>
 							<div className="flex flex-wrap gap-2">
 								{data.actors.primary
 									.filter((a) => a.trim())
@@ -220,7 +192,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 							</div>
 						</div>
 						<div>
-							<h5 className="font-medium text-sm mb-2">Secundarios</h5>
+							<h5 className="mb-2 font-medium text-sm">Secundarios</h5>
 							<div className="flex flex-wrap gap-2">
 								{data.actors.secondary
 									.filter((a) => a.trim())
@@ -238,22 +210,22 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 				</Card>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<ListCard title="Precondiciones" items={data.preconditions} />
 				<ListCard title="Condiciones" items={data.conditions} />
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<ListCard title="Resultados Exitosos" items={data.succuesfulResults} />
 				<ListCard title="Resultados Fallidos" items={data.failedResults} />
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<ListCard title="Datos de Entrada" items={data.input} />
 				<ListCard title="Datos de Salida" items={data.output} />
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<ListCard
 					title="Referencias de Documentación"
 					items={data.documentationRef}
@@ -268,7 +240,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 								{data.useCaseRef.map((ref, index) => (
 									<div
 										key={index}
-										className="flex items-center gap-2 p-2 bg-gray-50 rounded"
+										className="flex items-center gap-2 rounded bg-gray-50 p-2"
 									>
 										<Badge variant="outline">#{ref.id}</Badge>
 										<span>{ref.name}</span>
@@ -315,15 +287,15 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 									{flow.flowDetails.map((detail, detailIndex) => (
 										<Card key={detailIndex} className="bg-gray-50">
 											<CardContent className="pt-4">
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+												<div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
 													<div>
-														<span className="text-sm font-medium text-gray-500">
+														<span className="font-medium text-gray-500 text-sm">
 															Paso {detail.step}
 														</span>
 														<p className="font-medium">{detail.actor}</p>
 													</div>
 													<div>
-														<span className="text-sm font-medium text-gray-500">
+														<span className="font-medium text-gray-500 text-sm">
 															Acción
 														</span>
 														<p>{detail.action}</p>
@@ -331,7 +303,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 												</div>
 
 												<div className="mb-4">
-													<span className="text-sm font-medium text-gray-500">
+													<span className="font-medium text-gray-500 text-sm">
 														Respuesta del Sistema
 													</span>
 													<p>{detail.systemResponse}</p>
@@ -340,10 +312,10 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 												{detail.conditions.filter((c) => c.trim()).length >
 													0 && (
 													<div className="mb-4">
-														<span className="text-sm font-medium text-gray-500">
+														<span className="font-medium text-gray-500 text-sm">
 															Condiciones
 														</span>
-														<ul className="list-disc list-inside mt-1 space-y-1">
+														<ul className="mt-1 list-inside list-disc space-y-1">
 															{detail.conditions
 																.filter((c) => c.trim())
 																.map((condition, index) => (
@@ -358,16 +330,16 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 												{detail.exceptions.filter((e) => e.trim()).length >
 													0 && (
 													<div className="mb-4">
-														<span className="text-sm font-medium text-gray-500">
+														<span className="font-medium text-gray-500 text-sm">
 															Excepciones
 														</span>
-														<ul className="list-disc list-inside mt-1 space-y-1">
+														<ul className="mt-1 list-inside list-disc space-y-1">
 															{detail.exceptions
 																.filter((e) => e.trim())
 																.map((exception, index) => (
 																	<li
 																		key={index}
-																		className="text-sm text-red-600"
+																		className="text-red-600 text-sm"
 																	>
 																		{exception}
 																	</li>
@@ -378,10 +350,10 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 
 												{detail.notes && (
 													<div>
-														<span className="text-sm font-medium text-gray-500">
+														<span className="font-medium text-gray-500 text-sm">
 															Notas
 														</span>
-														<p className="text-sm text-gray-600 mt-1">
+														<p className="mt-1 text-gray-600 text-sm">
 															{detail.notes}
 														</p>
 													</div>
@@ -412,7 +384,7 @@ function ListCard({ title, items }: { title: string; items: string[] }) {
 					<ul className="space-y-2">
 						{filteredItems.map((item, index) => (
 							<li key={index} className="flex items-start gap-2">
-								<span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+								<span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500"></span>
 								<span>{item}</span>
 							</li>
 						))}

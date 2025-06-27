@@ -42,6 +42,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    useCases      UseCase[]
 }
 
 model VerificationToken {
@@ -52,6 +53,74 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
+enum UseCaseFlowType {
+    main
+    alternative
+    exception
+}
+
 model UseCase {
-    id Int @id @default(autoincrement())
+    id                Int      @id @default(autoincrement())
+    date              String
+    sector            String
+    name              String
+    participants      String[]
+    description       String
+    trigger           String
+    documentationRef  String[]
+    primaryActors     String[]
+    secondaryActors   String[]
+    preconditions     String[]
+    successfulResults String[]
+    failedResults     String[]
+    conditions        String[]
+    input             String[]
+    output            String[]
+    notes             String?
+    status            String   @default("draft") // draft, review, approved, rejected
+    deleted           Boolean  @default(false)
+
+    // Self-referencing relationships for use case references
+    referencedBy UseCase[] @relation("UseCaseReferences")
+    references   UseCase[] @relation("UseCaseReferences")
+
+    flows UseCaseFlow[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    authorId  String
+    author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model UseCaseFlow {
+    id          Int             @id @default(autoincrement())
+    name        String
+    type        UseCaseFlowType
+    frequency   Int             @default(0)
+    description String
+
+    useCaseId Int
+    useCase   UseCase @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
+
+    flowDetails UseCaseFlowDetail[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model UseCaseFlowDetail {
+    id             Int      @id @default(autoincrement())
+    step           Int
+    actor          String
+    action         String
+    systemResponse String
+    conditions     String[]
+    exceptions     String[]
+    notes          String?
+
+    flowId Int
+    flow   UseCaseFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
