@@ -26,6 +26,11 @@ import { UseCasePreview } from "~/components/useCasePreview";
 import { Separator } from "~/ui/separator";
 import { useCaseSchema } from "~/schemas";
 import type { UseCase } from "~/types";
+import {
+	createUseCaseDefaultValues,
+	createFlowDefaultValues,
+	createFlowDetailDefaultValues,
+} from "~/lib/useCaseDefaults";
 
 export function UseCaseForm() {
 	const [showPreview, setShowPreview] = useState(false);
@@ -33,49 +38,7 @@ export function UseCaseForm() {
 
 	const form = useForm<UseCase>({
 		resolver: zodResolver(useCaseSchema),
-		defaultValues: {
-			id: Date.now(), // Auto-generate ID based on timestamp
-			date: new Date().toISOString().split("T")[0],
-			sector: "",
-			name: "",
-			participants: [],
-			description: "",
-			trigger: "",
-			documentationRef: [],
-			useCaseRef: [],
-			actors: {
-				primary: [],
-				secondary: [],
-			},
-			preconditions: [],
-			succuesfulResults: [],
-			failedResults: [],
-			conditions: [],
-			flows: [
-				{
-					id: Date.now(), // Auto-generate flow ID
-					name: "",
-					type: "main",
-					frequency: 100,
-					description: "",
-					flowDetails: [
-						{
-							step: 1,
-							actor: "",
-							action: "",
-							systemResponse: "",
-							conditions: [],
-							exceptions: [],
-							notes: "",
-						},
-					],
-				},
-			],
-			input: [],
-			output: [],
-			notes: "",
-			status: "draft",
-		},
+		defaultValues: createUseCaseDefaultValues(),
 	});
 
 	const {
@@ -733,26 +696,7 @@ function FlowsSection({ control, errors, watch }: any) {
 				<Button
 					type="button"
 					variant="outline"
-					onClick={() =>
-						append({
-							id: Date.now(),
-							name: "",
-							type: "main",
-							frequency: 100,
-							description: "",
-							flowDetails: [
-								{
-									step: 1,
-									actor: "",
-									action: "",
-									systemResponse: "",
-									conditions: [],
-									exceptions: [],
-									notes: "",
-								},
-							],
-						})
-					}
+					onClick={() => append(createFlowDefaultValues())}
 					className="flex items-center gap-2"
 				>
 					<Plus className="h-4 w-4" />
@@ -872,17 +816,7 @@ function FlowDetailsSection({ control, errors, flowIndex, watch }: any) {
 			<Button
 				type="button"
 				variant="outline"
-				onClick={() =>
-					append({
-						step: fields.length + 1,
-						actor: "",
-						action: "",
-						systemResponse: "",
-						conditions: [],
-						exceptions: [],
-						notes: "",
-					})
-				}
+				onClick={() => append(createFlowDetailDefaultValues(fields.length + 1))}
 				className="flex items-center gap-2"
 			>
 				<Plus className="h-4 w-4" />
