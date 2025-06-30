@@ -1,60 +1,129 @@
 import { z } from "zod";
 
-// Zod validation schema
-export const useCaseFlowDetailSchema = z.object({
-	step: z.number().min(1, "Step must be at least 1"),
-	actor: z.string().min(1, "Actor is required"),
-	action: z.string().min(1, "Action is required"),
-	systemResponse: z.string().min(1, "System response is required"),
-	conditions: z.array(z.string().min(1, "Condition cannot be empty")),
-	exceptions: z.array(z.string().min(1, "Exception cannot be empty")),
+// Use Case Flow Detail Schemas
+export const createUseCaseFlowDetailSchema = z.object({
+	step: z.number().min(1, "El paso debe ser al menos 1"),
+	actor: z.string().min(1, "El actor es obligatorio"),
+	action: z.string().min(1, "La acción es obligatoria"),
+	systemResponse: z.string().min(1, "La respuesta del sistema es obligatoria"),
+	conditions: z.array(z.string().min(1, "La condición no puede estar vacía")),
+	exceptions: z.array(z.string().min(1, "La excepción no puede estar vacía")),
 	notes: z.string(),
 });
-export type UseCaseFlowDetail = z.infer<typeof useCaseFlowDetailSchema>;
 
-export const useCaseFlowSchema = z.object({
-	id: z.number().min(1, "ID must be at least 1"),
-	name: z.string().min(1, "Flow name is required"),
+export const updateUseCaseFlowDetailSchema =
+	createUseCaseFlowDetailSchema.extend({
+		id: z.number().min(1, "El ID debe ser al menos 1"),
+	});
+
+// Use Case Flow Schemas
+export const createUseCaseFlowSchema = z.object({
+	name: z.string().min(1, "El nombre del flujo es obligatorio"),
 	type: z.enum(["main", "alternative", "exception"]),
-	frequency: z.number().min(0).max(100, "Frequency must be between 0 and 100"),
-	description: z.string().min(1, "Description is required"),
+	frequency: z
+		.number()
+		.min(0)
+		.max(100, "La frecuencia debe estar entre 0 y 100"),
+	description: z.string().min(1, "La descripción es obligatoria"),
 	flowDetails: z
-		.array(useCaseFlowDetailSchema)
-		.min(1, "At least one flow detail is required"),
+		.array(createUseCaseFlowDetailSchema)
+		.min(1, "Se requiere al menos un detalle del flujo"),
 });
-export type UseCaseFlow = z.infer<typeof useCaseFlowSchema>;
 
-export const useCaseSchema = z.object({
-	id: z.number().min(1, "ID must be at least 1"),
-	date: z.string().min(1, "Date is required"),
-	sector: z.string().min(1, "Sector is required"),
-	name: z.string().min(1, "Use case name is required"),
-	participants: z.array(z.string().min(1, "Participant name cannot be empty")),
-	description: z.string().min(1, "Description is required"),
-	trigger: z.string().min(1, "Trigger is required"),
+export const updateUseCaseFlowSchema = createUseCaseFlowSchema.extend({
+	id: z.number().min(1, "El ID debe ser al menos 1"),
+	flowDetails: z
+		.array(updateUseCaseFlowDetailSchema)
+		.min(1, "Se requiere al menos un detalle del flujo"),
+});
+
+// Use Case Schemas
+export const createUseCaseSchema = z.object({
+	date: z.string().min(1, "La fecha es obligatoria"),
+	sector: z.string().min(1, "El sector es obligatorio"),
+	name: z.string().min(1, "El nombre del caso de uso es obligatorio"),
+	participants: z.array(
+		z.string().min(1, "El nombre del participante no puede estar vacío"),
+	),
+	description: z.string().min(1, "La descripción es obligatoria"),
+	trigger: z.string().min(1, "El disparador es obligatorio"),
 	documentationRef: z.array(
-		z.string().min(1, "Documentation reference cannot be empty"),
+		z.string().min(1, "La referencia de documentación no puede estar vacía"),
 	),
 	useCaseRef: z.array(
 		z.object({
-			id: z.number().min(1, "Reference ID must be at least 1"),
-			name: z.string().min(1, "Reference name is required"),
+			id: z.number().min(1, "El ID de referencia debe ser al menos 1"),
+			name: z.string().min(1, "El nombre de la referencia es obligatorio"),
 		}),
 	),
 	actors: z.object({
-		primary: z.array(z.string().min(1, "Primary actor cannot be empty")),
-		secondary: z.array(z.string().min(1, "Secondary actor cannot be empty")),
+		primary: z.array(
+			z.string().min(1, "El actor principal no puede estar vacío"),
+		),
+		secondary: z.array(
+			z.string().min(1, "El actor secundario no puede estar vacío"),
+		),
 	}),
-	preconditions: z.array(z.string().min(1, "Precondition cannot be empty")),
-	succuesfulResults: z.array(
-		z.string().min(1, "Successful result cannot be empty"),
+	preconditions: z.array(
+		z.string().min(1, "La precondición no puede estar vacía"),
 	),
-	failedResults: z.array(z.string().min(1, "Failed result cannot be empty")),
-	conditions: z.array(z.string().min(1, "Condition cannot be empty")),
-	flows: z.array(useCaseFlowSchema).min(1, "At least one flow is required"),
-	input: z.array(z.string().min(1, "Input cannot be empty")),
-	output: z.array(z.string().min(1, "Output cannot be empty")),
+	succuesfulResults: z.array(
+		z.string().min(1, "El resultado exitoso no puede estar vacío"),
+	),
+	failedResults: z.array(
+		z.string().min(1, "El resultado fallido no puede estar vacío"),
+	),
+	conditions: z.array(z.string().min(1, "La condición no puede estar vacía")),
+	flows: z
+		.array(createUseCaseFlowSchema)
+		.min(1, "Se requiere al menos un flujo"),
+	input: z.array(z.string().min(1, "La entrada no puede estar vacía")),
+	output: z.array(z.string().min(1, "La salida no puede estar vacía")),
 	notes: z.string(),
 	status: z.enum(["draft", "review", "approved", "rejected"]),
 });
-export type UseCase = z.infer<typeof useCaseSchema>;
+
+export const updateUseCaseSchema = createUseCaseSchema.extend({
+	id: z.number().min(1, "El ID debe ser al menos 1"),
+	flows: z
+		.array(updateUseCaseFlowSchema)
+		.min(1, "Se requiere al menos un flujo"),
+});
+
+export const upsertUseCaseSchema = z.discriminatedUnion("type", [
+	createUseCaseSchema.extend({ type: z.literal("create") }),
+	updateUseCaseSchema.extend({ type: z.literal("update") }),
+]);
+
+// Form schemas for React Hook Form (handles both create and update)
+export const useCaseFormFlowDetailSchema = createUseCaseFlowDetailSchema.extend(
+	{
+		id: z.number().min(1, "El ID debe ser al menos 1").optional(),
+	},
+);
+
+export const useCaseFormFlowSchema = createUseCaseFlowSchema.extend({
+	id: z.number().min(1, "El ID debe ser al menos 1").optional(),
+	flowDetails: z
+		.array(useCaseFormFlowDetailSchema)
+		.min(1, "Se requiere al menos un detalle del flujo"),
+});
+
+export const useCaseFormSchema = createUseCaseSchema.extend({
+	id: z.number().min(1, "El ID debe ser al menos 1").optional(),
+	flows: z.array(useCaseFormFlowSchema).min(1, "Se requiere al menos un flujo"),
+});
+
+// Type exports
+export type CreateUseCaseFlowDetail = z.infer<
+	typeof createUseCaseFlowDetailSchema
+>;
+export type UpdateUseCaseFlowDetail = z.infer<
+	typeof updateUseCaseFlowDetailSchema
+>;
+export type CreateUseCaseFlow = z.infer<typeof createUseCaseFlowSchema>;
+export type UpdateUseCaseFlow = z.infer<typeof updateUseCaseFlowSchema>;
+export type CreateUseCase = z.infer<typeof createUseCaseSchema>;
+export type UpdateUseCase = z.infer<typeof updateUseCaseSchema>;
+export type UseCaseForm = z.infer<typeof useCaseFormSchema>;
+export type UseCaseFull = UpdateUseCase;

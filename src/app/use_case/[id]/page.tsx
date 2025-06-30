@@ -1,23 +1,32 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { api } from "~/trpc/react";
-import { UseCasePreview } from "~/components/useCasePreview";
-import { Button } from "~/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { ErrorComponent } from "~/components/ErrorComponent";
+import { LoadingSkeleton } from "~/components/FormLoadingSkeleton";
+import { NotFoundComponent } from "~/components/NotFoundComponent";
+import { Button } from "~/components/ui/button";
+import { UseCasePreview } from "~/components/useCasePreview";
+import { UseCaseForm } from "~/components/use-case-form/UseCaseForm";
+import { api } from "~/trpc/react";
 
 interface UseCasePageProps {
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }
 
-export default function UseCasePage({ params }: UseCasePageProps) {
+export default async function UseCasePage({ params }: UseCasePageProps) {
+	const { id } = await params;
 	const router = useRouter();
-	const useCaseId = Number.parseInt(params.id, 10);
+	const searchParams = useSearchParams();
+	const isEditMode = searchParams.get("edit") === "true";
+	const useCaseId = Number.parseInt(id, 10);
 
 	const {
 		data: useCase,
 		isLoading,
 		error,
+		refetch,
 	} = api.useCase.getUseCase.useQuery(
 		{ id: useCaseId },
 		{
@@ -25,7 +34,10 @@ export default function UseCasePage({ params }: UseCasePageProps) {
 		},
 	);
 
-	if (Number.isNaN(useCaseId)) {
+	const notFound = !useCase && !error;
+	const isError = error || Number.isNaN(useCaseId);
+
+	if (isError) {
 		return (
 			<div className="container mx-auto min-h-screen bg-gray-50 px-4 py-8">
 				<div className="mx-auto max-w-4xl">
@@ -39,16 +51,36 @@ export default function UseCasePage({ params }: UseCasePageProps) {
 							Volver
 						</Button>
 					</div>
-					<div className="text-center">
-						<h1 className="mb-4 text-4xl font-bold text-gray-900">404</h1>
-						<h2 className="mb-4 text-xl font-semibold text-gray-700">
-							ID de caso de uso inválido
-						</h2>
-						<p className="text-gray-600">
-							El ID proporcionado no es válido. Por favor, verifica la URL e
-							intenta nuevamente.
-						</p>
+					<ErrorComponent
+						error={error}
+						onRetry={() => refetch()}
+						onGoHome={() => router.push("/use_case")}
+						title="Error al cargar el caso de uso"
+					/>
+				</div>
+			</div>
+		);
+	}
+
+	if (notFound || !useCase) {
+		return (
+			<div className="container mx-auto min-h-screen bg-gray-50 px-4 py-8">
+				<div className="mx-auto max-w-4xl">
+					<div className="mb-8">
+						<Button
+							variant="outline"
+							onClick={() => router.back()}
+							className="mb-4"
+						>
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver
+						</Button>
 					</div>
+					<NotFoundComponent
+						title="ID de caso de uso inválido o no encontrado"
+						message="El ID proporcionado no es válido o no existe. Por favor, verifica la URL e intenta nuevamente."
+						onGoHome={() => router.push("/use_case")}
+					/>
 				</div>
 			</div>
 		);
@@ -68,76 +100,7 @@ export default function UseCasePage({ params }: UseCasePageProps) {
 							Volver
 						</Button>
 					</div>
-					<div className="text-center">
-						<div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]">
-							<span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-								Cargando...
-							</span>
-						</div>
-						<p className="mt-4 text-gray-600">Cargando caso de uso...</p>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	if (error || !useCase) {
-		return (
-			<div className="container mx-auto min-h-screen bg-gray-50 px-4 py-8">
-				<div className="mx-auto max-w-4xl">
-					<div className="mb-8">
-						<Button
-							variant="outline"
-							onClick={() => router.back()}
-							className="mb-4"
-						>
-							<ArrowLeft className="mr-2 h-4 w-4" />
-							Volver
-						</Button>
-					</div>
-					<div className="text-center">
-						<h1 className="mb-4 font-bold text-4xl text-gray-900">404</h1>
-						<h2 className="mb-4 font-semibold text-gray-700 text-xl">
-							Caso de uso no encontrado
-						</h2>
-						<p className="text-gray-600">
-							El caso de uso que buscas no existe o ha sido eliminado.
-						</p>
-						<Button onClick={() => router.push("/use_case")} className="mt-6">
-							Ir a casos de uso
-						</Button>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	if (!useCase) {
-		return (
-			<div className="container mx-auto min-h-screen bg-gray-50 px-4 py-8">
-				<div className="mx-auto max-w-4xl">
-					<div className="mb-8">
-						<Button
-							variant="outline"
-							onClick={() => router.back()}
-							className="mb-4"
-						>
-							<ArrowLeft className="mr-2 h-4 w-4" />
-							Volver
-						</Button>
-					</div>
-					<div className="text-center">
-						<h1 className="mb-4 font-bold text-4xl text-gray-900">404</h1>
-						<h2 className="mb-4 font-semibold text-gray-700 text-xl">
-							Caso de uso no encontrado
-						</h2>
-						<p className="text-gray-600">
-							El caso de uso que buscas no existe o ha sido eliminado.
-						</p>
-						<Button onClick={() => router.push("/use_case")} className="mt-6">
-							Ir a casos de uso
-						</Button>
-					</div>
+					<LoadingSkeleton />
 				</div>
 			</div>
 		);
@@ -156,7 +119,15 @@ export default function UseCasePage({ params }: UseCasePageProps) {
 						Volver
 					</Button>
 				</div>
-				<UseCasePreview data={useCase} onBack={() => router.back()} />
+				{isEditMode ? (
+					<UseCaseForm
+						initialData={useCase}
+						isEditMode={true}
+						onSuccess={() => router.push(`/use_case/${useCaseId}`)}
+					/>
+				) : (
+					<UseCasePreview data={useCase} onBack={() => router.back()} />
+				)}
 			</div>
 		</div>
 	);

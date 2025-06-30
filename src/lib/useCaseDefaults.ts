@@ -1,8 +1,7 @@
-import type { UseCase } from "~/types";
+import type { CreateUseCase } from "~/schemas";
 
-export function createUseCaseDefaultValues(): UseCase {
+export function createUseCaseDefaultValues() {
 	return {
-		id: Date.now(), // Auto-generate ID based on timestamp
 		date: new Date().toISOString().split("T")[0] ?? "",
 		sector: "",
 		name: "",
@@ -21,7 +20,6 @@ export function createUseCaseDefaultValues(): UseCase {
 		conditions: [],
 		flows: [
 			{
-				id: Date.now(), // Auto-generate flow ID
 				name: "",
 				type: "main",
 				frequency: 100,
@@ -43,12 +41,11 @@ export function createUseCaseDefaultValues(): UseCase {
 		output: [],
 		notes: "",
 		status: "draft",
-	};
+	} satisfies CreateUseCase;
 }
 
 export function createFlowDefaultValues() {
 	return {
-		id: Date.now(),
 		name: "",
 		type: "main" as const,
 		frequency: 100,

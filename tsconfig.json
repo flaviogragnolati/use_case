@@ -32,6 +32,12 @@
 		/* Path Aliases */
 		"baseUrl": ".",
 		"paths": {
+			"~/constants": [
+				"src/constants/index.ts"
+			],
+			"~/utils/*": [
+				"src/server/utils/*"
+			],
 			"~/types": [
 				"src/types/index.ts"
 			],

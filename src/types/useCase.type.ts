@@ -1,46 +1,11 @@
-export type UseCaseFlowDetail = {
-	step: number;
-	actor: string;
-	action: string;
-	systemResponse: string;
-	conditions: string[];
-	exceptions: string[];
-	notes: string;
-};
+import type { Prisma } from "@prisma/client";
 
-export type UseCaseFlow = {
-	id: number;
-	name: string;
-	type: "main" | "alternative" | "exception";
-	frequency: number;
-	description: string;
-	flowDetails: UseCaseFlowDetail[];
-};
-
-export type UseCase = {
-	id: number;
-	date: string;
-	sector: string;
-	name: string;
-	participants: string[];
-	description: string;
-	trigger: string;
-	documentationRef: string[];
-	useCaseRef: {
-		id: number;
-		name: string;
-	}[];
-	actors: {
-		primary: string[];
-		secondary: string[];
+export type UseCaseWithIncludes = Prisma.UseCaseGetPayload<{
+	include: {
+		flows: {
+			include: {
+				flowDetails: true;
+			};
+		};
 	};
-	preconditions: string[];
-	succuesfulResults: string[];
-	failedResults: string[];
-	conditions: string[];
-	flows: UseCaseFlow[];
-	input: string[];
-	output: string[];
-	notes: string;
-	status: "draft" | "review" | "approved" | "rejected";
-};
+}>;

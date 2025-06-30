@@ -1,80 +1,23 @@
 import { z } from "zod";
-import { useCaseSchema } from "~/schemas";
 import { TRPCError } from "@trpc/server";
-import type { UseCase } from "~/types/useCase.type";
-import type { Prisma } from "@prisma/client";
 
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from "~/server/api/trpc";
-
-// Type for the database result with includes
-type UseCaseWithIncludes = Prisma.UseCaseGetPayload<{
-	include: {
-		flows: {
-			include: {
-				flowDetails: true;
-			};
-		};
-	};
-}>;
-
-// Transform database result to match UseCase type
-function transformUseCaseData(dbUseCase: UseCaseWithIncludes): UseCase {
-	return {
-		id: dbUseCase.id,
-		date: dbUseCase.date,
-		sector: dbUseCase.sector,
-		name: dbUseCase.name,
-		participants: dbUseCase.participants,
-		description: dbUseCase.description,
-		trigger: dbUseCase.trigger,
-		documentationRef: dbUseCase.documentationRef,
-		useCaseRef: [], // TODO: Handle references when implemented in schema
-		actors: {
-			primary: dbUseCase.primaryActors || [],
-			secondary: dbUseCase.secondaryActors || [],
-		},
-		preconditions: dbUseCase.preconditions,
-		succuesfulResults: dbUseCase.successfulResults || [],
-		failedResults: dbUseCase.failedResults,
-		conditions: dbUseCase.conditions,
-		flows:
-			dbUseCase.flows?.map((flow) => ({
-				id: flow.id,
-				name: flow.name,
-				type: flow.type,
-				frequency: flow.frequency,
-				description: flow.description,
-				flowDetails:
-					flow.flowDetails?.map((detail) => ({
-						step: detail.step,
-						actor: detail.actor,
-						action: detail.action,
-						systemResponse: detail.systemResponse,
-						conditions: detail.conditions || [],
-						exceptions: detail.exceptions || [],
-						notes: detail.notes || "",
-					})) || [],
-			})) || [],
-		input: dbUseCase.input,
-		output: dbUseCase.output,
-		notes: dbUseCase.notes || "",
-		status: dbUseCase.status as "draft" | "review" | "approved" | "rejected",
-	};
-}
+import { transformUseCaseData } from "~/utils/useCase.utils";
+import { upsertUseCaseSchema } from "~/schemas";
 
 export const useCaseRouter = createTRPCRouter({
 	saveUseCase: protectedProcedure
-		.input(useCaseSchema)
+		.input(upsertUseCaseSchema)
 		.mutation(async ({ input, ctx }) => {
 			const { db, session } = ctx;
 			const userId = session.user.id;
 
 			try {
-				const isUpdate = input.id > 0;
+				const isUpdate = input.type === "update";
 
 				if (isUpdate) {
 					// Verify the use case exists and belongs to the user
@@ -237,6 +180,8 @@ export const useCaseRouter = createTRPCRouter({
 		.query(async ({ input, ctx }) => {
 			const { db } = ctx;
 
+			if (!input.id && !input.name) return null;
+
 			try {
 				if (input.id) {
 					const useCase = await db.useCase.findUnique({
@@ -261,7 +206,7 @@ export const useCaseRouter = createTRPCRouter({
 				}
 
 				if (input.name) {
-					const useCases = await db.useCase.findFirst({
+					const useCase = await db.useCase.findFirst({
 						where: { name: { contains: input.name, mode: "insensitive" } },
 						include: {
 							flows: {
@@ -272,7 +217,14 @@ export const useCaseRouter = createTRPCRouter({
 						},
 					});
 
-					return transformUseCaseData(useCases);
+					if (!useCase) {
+						throw new TRPCError({
+							code: "NOT_FOUND",
+							message: "Use case not found",
+						});
+					}
+
+					return transformUseCaseData(useCase);
 				}
 
 				throw new TRPCError({

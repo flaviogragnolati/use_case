@@ -1,5 +1,13 @@
 "use client";
 
+import { ArrowLeft, Download, Share } from "lucide-react";
+import {
+	getFlowTypeColor,
+	getStatusColor,
+	getStatusText,
+} from "~/lib/useCase.utils";
+import type { UseCaseForm } from "~/schemas";
+import { Badge } from "~/ui/badge";
 import { Button } from "~/ui/button";
 import {
 	Card,
@@ -8,64 +16,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/ui/card";
-import { Badge } from "~/ui/badge";
-import { ArrowLeft, Download, Share } from "lucide-react";
-import type { UseCase } from "~/schemas";
-import {
-	getStatusColor,
-	getStatusText,
-	getFlowTypeColor,
-} from "~/lib/useCase.utils";
-
-// type UseCaseFlowDetail = {
-// 	step: number;
-// 	actor: string;
-// 	action: string;
-// 	systemResponse: string;
-// 	conditions: string[];
-// 	exceptions: string[];
-// 	notes: string;
-// };
-
-// type UseCaseFlow = {
-// 	id: number;
-// 	name: string;
-// 	type: "main" | "alternative" | "exception";
-// 	frequency: number;
-// 	description: string;
-// 	flowDetails: UseCaseFlowDetail[];
-// };
-
-// type UseCase = {
-// 	id: number;
-// 	date: string;
-// 	sector: string;
-// 	name: string;
-// 	participants: string[];
-// 	description: string;
-// 	trigger: string;
-// 	documentationRef: string[];
-// 	useCaseRef: {
-// 		id: number;
-// 		name: string;
-// 	}[];
-// 	actors: {
-// 		primary: string[];
-// 		secondary: string[];
-// 	};
-// 	preconditions: string[];
-// 	succuesfulResults: string[];
-// 	failedResults: string[];
-// 	conditions: string[];
-// 	flows: UseCaseFlow[];
-// 	input: string[];
-// 	output: string[];
-// 	notes: string;
-// 	status: "draft" | "review" | "approved" | "rejected";
-// };
 
 interface UseCasePreviewProps {
-	data: UseCase;
+	data: UseCaseForm;
 	onBack: () => void;
 }
 
@@ -73,7 +26,7 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 	const exportToJSON = () => {
 		const dataStr = JSON.stringify(data, null, 2);
 		const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-		const exportFileDefaultName = `use-case-${data.id}-${data.name.replace(/\s+/g, "-").toLowerCase()}.json`;
+		const exportFileDefaultName = `use-case-${data.id || "new"}-${data.name.replace(/\s+/g, "-").toLowerCase()}.json`;
 
 		const linkElement = document.createElement("a");
 		linkElement.setAttribute("href", dataUri);
@@ -114,7 +67,8 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 						<div>
 							<CardTitle className="text-2xl">{data.name}</CardTitle>
 							<CardDescription>
-								Use Case #{data.id} • {data.sector}
+								{data.id ? `Use Case #${data.id}` : "Nuevo Caso de Uso"} •{" "}
+								{data.sector}
 							</CardDescription>
 						</div>
 						<Badge className={getStatusColor(data.status)}>
@@ -265,7 +219,9 @@ export function UseCasePreview({ data, onBack }: UseCasePreviewProps) {
 								<div className="flex items-center justify-between">
 									<div>
 										<CardTitle className="text-lg">{flow.name}</CardTitle>
-										<CardDescription>Flujo #{flow.id}</CardDescription>
+										<CardDescription>
+											{flow.id ? `Flujo #${flow.id}` : "Nuevo Flujo"}
+										</CardDescription>
 									</div>
 									<div className="flex items-center gap-2">
 										<Badge className={getFlowTypeColor(flow.type)}>
@@ -384,7 +340,7 @@ function ListCard({ title, items }: { title: string; items: string[] }) {
 					<ul className="space-y-2">
 						{filteredItems.map((item, index) => (
 							<li key={index} className="flex items-start gap-2">
-								<span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500"></span>
+								<span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
 								<span>{item}</span>
 							</li>
 						))}
