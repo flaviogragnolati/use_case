@@ -1,5 +1,12 @@
 import { Plus, Trash2 } from "lucide-react";
-import { Controller, useFieldArray, type FieldPath } from "react-hook-form";
+import {
+	Controller,
+	useFieldArray,
+	type FieldPath,
+	type ArrayPath,
+	useFormContext,
+} from "react-hook-form";
+import { useRef, useEffect } from "react";
 import { Button } from "~/ui/button";
 import {
 	Card,
@@ -16,17 +23,41 @@ export function StringArraySection<T extends StringArrayFields>({
 	name,
 	title,
 	description,
-	control,
-	errors,
 }: StringArraySectionProps<T>) {
-	// Create a properly typed useFieldArray call
+	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext<UseCaseForm>();
+
 	const { fields, append, remove } = useFieldArray({
 		control,
-		name,
+		name: name as ArrayPath<UseCaseForm>,
 	});
 
-	// Type-safe error access
-	const fieldError = (errors as Record<string, any>)[name];
+	const fieldError = errors[name as keyof typeof errors];
+
+	const handleAppend = () => {
+		append("" as any);
+
+		// Focus on the new input after it's rendered
+		setTimeout(() => {
+			const newIndex = fields.length;
+			inputRefs.current[newIndex]?.focus();
+		}, 0);
+	};
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			handleAppend();
+		}
+	};
+
+	useEffect(() => {
+		inputRefs.current = inputRefs.current.slice(0, fields.length);
+	}, [fields.length]);
 
 	return (
 		<Card>
@@ -43,9 +74,17 @@ export function StringArraySection<T extends StringArrayFields>({
 							render={({ field: controllerField }) => (
 								<Input
 									{...controllerField}
+									ref={(el) => {
+										inputRefs.current[index] = el;
+									}}
 									value={String(controllerField.value || "")}
 									placeholder={`Ingrese ${title.toLowerCase()}`}
-									className={fieldError?.[index] ? "border-red-500" : ""}
+									className={
+										fieldError && Array.isArray(fieldError) && fieldError[index]
+											? "border-red-500"
+											: ""
+									}
+									onKeyDown={handleKeyDown}
 								/>
 							)}
 						/>
@@ -71,11 +110,11 @@ export function StringArraySection<T extends StringArrayFields>({
 				<Button
 					type="button"
 					variant="outline"
-					onClick={() => append("")}
+					onClick={handleAppend}
 					className="flex items-center gap-2"
 				>
 					<Plus className="h-4 w-4" />
-					Agregar {title.endsWith("s") ? title.slice(0, -1) : title}
+					Agregar {title}
 				</Button>
 			</CardContent>
 		</Card>

@@ -1,5 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button } from "~/ui/button";
 import {
 	Card,
@@ -10,12 +10,20 @@ import {
 } from "~/ui/card";
 import { FormInput, FormNumberInput } from "~/ui/fields";
 import type { FormSectionProps } from "./types";
+import type { UseCaseForm } from "~/schemas";
 
-export function UseCaseRefSection({ control, errors }: FormSectionProps) {
+export function UseCaseRefSection() {
+	const {
+		control,
+		formState: { errors: _errors },
+	} = useFormContext<UseCaseForm>();
+
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "useCaseRef",
 	});
+
+	const errors = _errors.useCaseRef ?? [];
 
 	return (
 		<Card>
@@ -33,14 +41,14 @@ export function UseCaseRefSection({ control, errors }: FormSectionProps) {
 							name={`useCaseRef.${index}.id`}
 							placeholder="ID"
 							className="w-24"
-							error={(errors as any).useCaseRef?.[index]?.id?.message}
+							error={errors[index]?.id?.message}
 						/>
 						<FormInput
 							control={control}
 							name={`useCaseRef.${index}.name`}
 							placeholder="Nombre del caso de uso"
 							className="flex-1"
-							error={(errors as any).useCaseRef?.[index]?.name?.message}
+							error={errors[index]?.name?.message}
 						/>
 						<Button
 							type="button"

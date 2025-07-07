@@ -1,3 +1,4 @@
+import { useFormContext } from "react-hook-form";
 import { C } from "~/constants";
 import {
 	Card,
@@ -12,17 +13,24 @@ import {
 	FormTextarea,
 	type SelectOption,
 } from "~/ui/fields";
-import type { FormSectionWithWatchProps } from "./types";
+import type { UseCaseForm } from "~/schemas";
 
-export function BasicInformationSection({
-	control,
-	errors,
-	watch,
-}: FormSectionWithWatchProps) {
+export function BasicInformationSection() {
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext<UseCaseForm>();
+
 	const statusOptions: SelectOption[] = C.formStatus.map((status) => ({
 		value: status,
 		label: C.statusMap[status],
 	}));
+	const procedureOptions: SelectOption[] = C.procedures.map(
+		(procedure, idx) => ({
+			value: String(idx),
+			label: procedure,
+		}),
+	);
 
 	return (
 		<Card>
@@ -36,28 +44,10 @@ export function BasicInformationSection({
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<FormInput
 						control={control}
-						name="id"
-						label="ID (Generado automáticamente)"
-						disabled
-						className="bg-gray-100"
-					/>
-					<FormInput
-						control={control}
 						name="date"
 						label="Fecha"
 						type="date"
 						error={errors.date?.message}
-						required
-					/>
-				</div>
-
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<FormInput
-						control={control}
-						name="sector"
-						label="Sector"
-						placeholder="ej., Finanzas, Salud, Educación"
-						error={errors.sector?.message}
 						required
 					/>
 					<FormSelect
@@ -67,6 +57,26 @@ export function BasicInformationSection({
 						placeholder="Seleccionar estado"
 						options={statusOptions}
 						error={errors.status?.message}
+						required
+					/>
+				</div>
+
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<FormInput
+						control={control}
+						name="sector"
+						label="Sector"
+						placeholder="ej., DGI, DGCEOR, DG..."
+						error={errors.sector?.message}
+						required
+					/>
+					<FormSelect
+						control={control}
+						name="relatedProcedure"
+						label="Tramiite Relacionado"
+						placeholder="Seleccionar trámite"
+						options={procedureOptions}
+						error={errors.relatedProcedure?.message}
 						required
 					/>
 				</div>

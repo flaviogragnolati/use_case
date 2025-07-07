@@ -1,5 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import { createFlowDefaultValues } from "~/lib/useCaseDefaults";
 import { Button } from "~/ui/button";
 import {
@@ -9,8 +9,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/ui/card";
-import { Input } from "~/ui/input";
-import { Label } from "~/ui/label";
 import {
 	FormInput,
 	FormNumberInput,
@@ -19,13 +17,14 @@ import {
 	type SelectOption,
 } from "~/ui/fields";
 import { FlowDetailsSection } from "./FlowDetailsSection";
-import type { FormSectionWithWatchProps } from "./types";
+import type { UseCaseForm } from "~/schemas";
 
-export function FlowsSection({
-	control,
-	errors,
-	watch,
-}: FormSectionWithWatchProps) {
+export function FlowsSection() {
+	const {
+		control,
+		formState: { errors: _errors },
+	} = useFormContext<UseCaseForm>();
+
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "flows",
@@ -36,6 +35,8 @@ export function FlowsSection({
 		{ value: "alternative", label: "Alternativo" },
 		{ value: "exception", label: "Excepción" },
 	];
+
+	const errors = _errors.flows ?? [];
 
 	return (
 		<Card>
@@ -63,21 +64,13 @@ export function FlowsSection({
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-								<div>
-									<Label>ID del Flujo (Generado automáticamente)</Label>
-									<Input
-										value={watch(`flows.${flowIndex}.id`)}
-										disabled
-										className="bg-gray-100"
-									/>
-								</div>
 								<FormSelect
 									control={control}
 									name={`flows.${flowIndex}.type`}
 									label="Tipo de Flujo"
 									placeholder="Seleccionar tipo"
 									options={flowTypeOptions}
-									error={(errors as any).flows?.[flowIndex]?.type?.message}
+									error={errors[flowIndex]?.type?.message}
 									required
 								/>
 							</div>
@@ -88,7 +81,7 @@ export function FlowsSection({
 									name={`flows.${flowIndex}.name`}
 									label="Nombre del Flujo"
 									placeholder="Nombre del flujo"
-									error={(errors as any).flows?.[flowIndex]?.name?.message}
+									error={errors[flowIndex]?.name?.message}
 									required
 								/>
 								<FormNumberInput
@@ -97,7 +90,7 @@ export function FlowsSection({
 									label="Frecuencia (%)"
 									min={0}
 									max={100}
-									error={(errors as any).flows?.[flowIndex]?.frequency?.message}
+									error={errors[flowIndex]?.frequency?.message}
 									required
 								/>
 							</div>
@@ -107,16 +100,11 @@ export function FlowsSection({
 								name={`flows.${flowIndex}.description`}
 								label="Descripción"
 								placeholder="Descripción del flujo"
-								error={(errors as any).flows?.[flowIndex]?.description?.message}
+								error={errors[flowIndex]?.description?.message}
 								required
 							/>
 
-							<FlowDetailsSection
-								control={control}
-								errors={errors}
-								flowIndex={flowIndex}
-								watch={watch}
-							/>
+							<FlowDetailsSection flowIndex={flowIndex} />
 						</CardContent>
 					</Card>
 				))}

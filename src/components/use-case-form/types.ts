@@ -8,8 +8,8 @@ import type {
 import type { UseCaseForm } from "~/schemas";
 
 export interface FormSectionProps {
-	control: Control<UseCaseForm>;
-	errors: FieldErrors<UseCaseForm>;
+	control?: Control<UseCaseForm>;
+	errors?: FieldErrors<UseCaseForm>;
 }
 
 export interface FormSectionWithWatchProps extends FormSectionProps {
@@ -33,4 +33,5 @@ export interface FlowDetailArraySectionProps {
 	name: string;
 	label: string;
 	placeholder: string;
+	index: number;
 }

@@ -13,7 +13,7 @@ export const createUseCaseFlowDetailSchema = z.object({
 
 export const updateUseCaseFlowDetailSchema =
 	createUseCaseFlowDetailSchema.extend({
-		id: z.number().min(1, "El ID debe ser al menos 1"),
+		id: z.number().min(1, "El ID debe ser al menos 1").optional(),
 	});
 
 // Use Case Flow Schemas
@@ -31,7 +31,7 @@ export const createUseCaseFlowSchema = z.object({
 });
 
 export const updateUseCaseFlowSchema = createUseCaseFlowSchema.extend({
-	id: z.number().min(1, "El ID debe ser al menos 1"),
+	id: z.number().min(1, "El ID debe ser al menos 1").optional(),
 	flowDetails: z
 		.array(updateUseCaseFlowDetailSchema)
 		.min(1, "Se requiere al menos un detalle del flujo"),
@@ -39,9 +39,10 @@ export const updateUseCaseFlowSchema = createUseCaseFlowSchema.extend({
 
 // Use Case Schemas
 export const createUseCaseSchema = z.object({
+	name: z.string().min(1, "El nombre del caso de uso es obligatorio"),
 	date: z.string().min(1, "La fecha es obligatoria"),
 	sector: z.string().min(1, "El sector es obligatorio"),
-	name: z.string().min(1, "El nombre del caso de uso es obligatorio"),
+	relatedProcedure: z.string().min(1, "El trámite relacionado es obligatorio"),
 	participants: z.array(
 		z.string().min(1, "El nombre del participante no puede estar vacío"),
 	),
@@ -84,7 +85,7 @@ export const createUseCaseSchema = z.object({
 });
 
 export const updateUseCaseSchema = createUseCaseSchema.extend({
-	id: z.number().min(1, "El ID debe ser al menos 1"),
+	id: z.number().min(1, "El ID debe ser al menos 1").optional(),
 	flows: z
 		.array(updateUseCaseFlowSchema)
 		.min(1, "Se requiere al menos un flujo"),

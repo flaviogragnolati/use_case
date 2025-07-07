@@ -58,74 +58,74 @@ export function UseCaseIndex({ useCases }: UseCaseIndexProps) {
 
 	return (
 		<div className="space-y-6">
-			{/* Search and Filters */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Search className="h-5 w-5" />
-						Buscar y Filtrar Casos de Uso
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="flex flex-col gap-4 md:flex-row">
-						<div className="flex-1">
-							<div className="relative">
-								<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
-								<Input
-									placeholder="Buscar por nombre, descripción, sector o participantes..."
-									value={searchTerm}
-									onChange={(e) => setSearchTerm(e.target.value)}
-									className="pl-10"
-								/>
+			{useCases.length > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Search className="h-5 w-5" />
+							Buscar y Filtrar Casos de Uso
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="flex flex-col gap-4 md:flex-row">
+							<div className="flex-1">
+								<div className="relative">
+									<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
+									<Input
+										placeholder="Buscar por nombre, descripción, sector o participantes..."
+										value={searchTerm}
+										onChange={(e) => setSearchTerm(e.target.value)}
+										className="pl-10"
+									/>
+								</div>
+							</div>
+							<div className="flex gap-2">
+								<Select value={statusFilter} onValueChange={setStatusFilter}>
+									<SelectTrigger className="w-40">
+										<SelectValue placeholder="Estado" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Todos los Estados</SelectItem>
+										{C.formStatus.map((status) => (
+											<SelectItem key={status} value={status}>
+												{C.statusMap[status]}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<Select value={sectorFilter} onValueChange={setSectorFilter}>
+									<SelectTrigger className="w-40">
+										<SelectValue placeholder="Sector" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Todos los Sectores</SelectItem>
+										{uniqueSectors.map((sector) => (
+											<SelectItem key={sector} value={sector}>
+												{sector}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 						</div>
-						<div className="flex gap-2">
-							<Select value={statusFilter} onValueChange={setStatusFilter}>
-								<SelectTrigger className="w-40">
-									<SelectValue placeholder="Estado" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="all">Todos los Estados</SelectItem>
-									{C.formStatus.map((status) => (
-										<SelectItem key={status} value={status}>
-											{C.statusMap[status]}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<Select value={sectorFilter} onValueChange={setSectorFilter}>
-								<SelectTrigger className="w-40">
-									<SelectValue placeholder="Sector" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="all">Todos los Sectores</SelectItem>
-									{uniqueSectors.map((sector) => (
-										<SelectItem key={sector} value={sector}>
-											{sector}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+
+						<div className="flex items-center justify-between">
+							<p className="text-gray-600 text-sm">
+								Mostrando {filteredUseCases.length} de {useCases.length} casos
+								de uso
+							</p>
+							<Button
+								onClick={handleCreateNew}
+								className="flex cursor-pointer items-center gap-2"
+							>
+								<Plus className="h-4 w-4" />
+								Nuevo Caso de Uso
+							</Button>
 						</div>
-					</div>
+					</CardContent>
+				</Card>
+			)}
 
-					<div className="flex items-center justify-between">
-						<p className="text-gray-600 text-sm">
-							Mostrando {filteredUseCases.length} de {useCases.length} casos de
-							uso
-						</p>
-						<Button
-							onClick={handleCreateNew}
-							className="flex items-center gap-2"
-						>
-							<Plus className="h-4 w-4" />
-							Nuevo Caso de Uso
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
-
-			{/* Use Cases Grid */}
 			{filteredUseCases.length === 0 ? (
 				<Card>
 					<CardContent className="py-12 text-center">
@@ -140,7 +140,7 @@ export function UseCaseIndex({ useCases }: UseCaseIndexProps) {
 						</p>
 						<Button
 							onClick={handleCreateNew}
-							className="flex items-center gap-2"
+							className="mx-auto flex cursor-pointer items-center gap-2"
 						>
 							<Plus className="h-4 w-4" />
 							Crear Primer Caso de Uso

@@ -1,27 +1,28 @@
 import { Plus, Trash2 } from "lucide-react";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import { createFlowDetailDefaultValues } from "~/lib/useCaseDefaults";
 import { Button } from "~/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/ui/card";
 import { Label } from "~/ui/label";
 import { FormInput, FormNumberInput, FormTextarea } from "~/ui/fields";
 import { FlowDetailArraySection } from "./FlowDetailArraySection";
-import type { FormSectionWithWatchProps } from "./types";
+import type { UseCaseForm } from "~/schemas";
 
-interface FlowDetailsSectionProps extends FormSectionWithWatchProps {
+interface FlowDetailsSectionProps {
 	flowIndex: number;
 }
 
-export function FlowDetailsSection({
-	control,
-	errors,
-	flowIndex,
-	watch,
-}: FlowDetailsSectionProps) {
+export function FlowDetailsSection({ flowIndex }: FlowDetailsSectionProps) {
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext<UseCaseForm>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: `flows.${flowIndex}.flowDetails`,
 	});
+
+	const flowErrors = errors.flows ?? [];
 
 	return (
 		<div className="space-y-4">
@@ -50,12 +51,20 @@ export function FlowDetailsSection({
 								name={`flows.${flowIndex}.flowDetails.${detailIndex}.step`}
 								label="Número de Paso"
 								min={1}
+								error={
+									flowErrors[flowIndex]?.flowDetails?.[detailIndex]?.step
+										?.message
+								}
 							/>
 							<FormInput
 								control={control}
 								name={`flows.${flowIndex}.flowDetails.${detailIndex}.actor`}
 								label="Actor"
 								placeholder="Nombre del actor"
+								error={
+									flowErrors[flowIndex]?.flowDetails?.[detailIndex]?.actor
+										?.message
+								}
 							/>
 						</div>
 
@@ -64,6 +73,10 @@ export function FlowDetailsSection({
 							name={`flows.${flowIndex}.flowDetails.${detailIndex}.action`}
 							label="Acción"
 							placeholder="Descripción de la acción"
+							error={
+								flowErrors[flowIndex]?.flowDetails?.[detailIndex]?.action
+									?.message
+							}
 						/>
 
 						<FormInput
@@ -71,6 +84,10 @@ export function FlowDetailsSection({
 							name={`flows.${flowIndex}.flowDetails.${detailIndex}.systemResponse`}
 							label="Respuesta del Sistema"
 							placeholder="Respuesta del sistema"
+							error={
+								flowErrors[flowIndex]?.flowDetails?.[detailIndex]
+									?.systemResponse?.message
+							}
 						/>
 
 						<FlowDetailArraySection
@@ -78,6 +95,7 @@ export function FlowDetailsSection({
 							name={`flows.${flowIndex}.flowDetails.${detailIndex}.conditions`}
 							label="Condiciones"
 							placeholder="Ingrese condición"
+							index={detailIndex}
 						/>
 
 						<FlowDetailArraySection
@@ -85,6 +103,7 @@ export function FlowDetailsSection({
 							name={`flows.${flowIndex}.flowDetails.${detailIndex}.exceptions`}
 							label="Excepciones"
 							placeholder="Ingrese excepción"
+							index={detailIndex}
 						/>
 
 						<FormTextarea
@@ -92,6 +111,10 @@ export function FlowDetailsSection({
 							name={`flows.${flowIndex}.flowDetails.${detailIndex}.notes`}
 							label="Notas"
 							placeholder="Notas adicionales"
+							error={
+								flowErrors[flowIndex]?.flowDetails?.[detailIndex]?.notes
+									?.message
+							}
 						/>
 					</CardContent>
 				</Card>

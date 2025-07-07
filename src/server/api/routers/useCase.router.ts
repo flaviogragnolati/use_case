@@ -10,11 +10,12 @@ import { transformUseCaseData } from "~/utils/useCase.utils";
 import { upsertUseCaseSchema } from "~/schemas";
 
 export const useCaseRouter = createTRPCRouter({
-	saveUseCase: protectedProcedure
+	saveUseCase: publicProcedure
 		.input(upsertUseCaseSchema)
 		.mutation(async ({ input, ctx }) => {
+			console.log("Saving use case with input:", input);
 			const { db, session } = ctx;
-			const userId = session.user.id;
+			const userId = '1'
 
 			try {
 				const isUpdate = input.type === "update";

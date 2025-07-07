@@ -35,7 +35,7 @@ export function FormInput<T extends FieldValues>({
 			{label && (
 				<Label htmlFor={name}>
 					{label}
-					{required && <span className="ml ml ml ml ml ml">*</span>}
+					{required && <span className="ml-1">*</span>}
 				</Label>
 			)}
 			<Controller

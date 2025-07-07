@@ -1,5 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
-import { Controller, useFieldArray } from "react-hook-form";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { Button } from "~/ui/button";
 import {
 	Card,
@@ -11,9 +11,14 @@ import {
 import { Input } from "~/ui/input";
 import { Label } from "~/ui/label";
 import { Separator } from "~/ui/separator";
-import type { FormSectionProps } from "./types";
+import type { UseCaseForm } from "~/schemas";
 
-export function ActorsSection({ control, errors }: FormSectionProps) {
+export function ActorsSection() {
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext<UseCaseForm>();
+
 	const primaryFields = useFieldArray({
 		control,
 		name: "actors.primary",
@@ -23,6 +28,9 @@ export function ActorsSection({ control, errors }: FormSectionProps) {
 		control,
 		name: "actors.secondary",
 	});
+
+	const primaryError = errors.actors?.primary ?? [];
+	const secondaryError = errors.actors?.secondary ?? [];
 
 	return (
 		<Card>
@@ -45,11 +53,7 @@ export function ActorsSection({ control, errors }: FormSectionProps) {
 										<Input
 											{...field}
 											placeholder="Nombre del actor primario"
-											className={
-												(errors as any).actors?.primary?.[index]
-													? "border-red-500"
-													: ""
-											}
+											className={primaryError[index] ? "border-red-500" : ""}
 										/>
 									)}
 								/>
@@ -89,11 +93,7 @@ export function ActorsSection({ control, errors }: FormSectionProps) {
 										<Input
 											{...field}
 											placeholder="Nombre del actor secundario"
-											className={
-												(errors as any).actors?.secondary?.[index]
-													? "border-red-500"
-													: ""
-											}
+											className={secondaryError[index] ? "border-red-500" : ""}
 										/>
 									)}
 								/>

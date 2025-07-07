@@ -37,7 +37,7 @@ export function FormNumberInput<T extends FieldValues>({
 			{label && (
 				<Label htmlFor={name}>
 					{label}
-					{required && <span className="ml-1 ml-1 ml-1 ml">*</span>}
+					{required && <span className="ml-1">*</span>}
 				</Label>
 			)}
 			<Controller
